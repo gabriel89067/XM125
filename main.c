@@ -16,15 +16,14 @@
  software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  CONDITIONS OF ANY KIND, either express or implied.
  */
-#include "i2c_t.h"
+
 #include <stdio.h>
 #include "cJSON.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
 #include "xm125.h"
 #include "driver/gpio.h"
-#include "spi.h"
-#include "ble.h"
+
 
 static const char *TAG = "i2c_radar";
 
@@ -42,8 +41,6 @@ int led_p = 0;
 static QueueHandle_t gpio_evt_queue = NULL;
 //struct config_t config;
 
-SX1276_hw_t SX1276_hw;
-SX1276_t SX1276;
 
 void task_xm125_distance(void *pvParameter){
 	while (1) {
@@ -203,22 +200,7 @@ void task_xm125_presence(void *pvParameter){
 
 void app_main(void) {
 
-	init_spi();
-	ESP_LOGI(TAG, "Initializing SX1276 SPI...");
-
-	// create a queue to handle gpio event from isr
-	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-	// start lora transceiver
-	SX1276_hw.dio0.pin = SX1276_DIO0;
-	SX1276_hw.nss.pin = SX1276_CS;
-	SX1276_hw.reset.pin = SX1276_NRESET;
-	SX1276.hw = &SX1276_hw;
-
-	SX1276_begin(&SX1276, SX1276_915MHZ, SX1276_POWER_17DBM); // Inicializa o LoRa
-	SX1276_configmsg(&SX1276); // Configura o tamanho do preambulo e da palavra de sincronismo
-	SX1276_configdio0(&SX1276);             // Configura o DIO0 para interrupção
-
-	//SX1276_receive(&SX1276);
+	
 
 	gpio_config_t io_conf;
 	io_conf.intr_type = GPIO_INTR_DISABLE;         // Desabilitar interrupções
@@ -252,3 +234,4 @@ void app_main(void) {
 
 	ESP_LOGI(TAG, "I2C de-initialized successfully");
 }
+
